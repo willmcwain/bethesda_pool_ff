@@ -2,8 +2,8 @@ name: Generate and Deploy Fantasy Report
 
 on:
   schedule:
-    - cron: '0 14 * * 2' # Runs every Tuesday at 9:00 AM UTC
-  workflow_dispatch:      # Allows you to run this manually from the GitHub website
+    - cron: '0 10 * * 2'
+  workflow_dispatch:
 
 permissions:
   contents: write        # Required to push the generated HTML back to the repo
