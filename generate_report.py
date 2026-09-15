@@ -475,7 +475,7 @@ fig.update_xaxes(
 nav_bar_html = """
 <div style="background-color: #333; overflow: hidden; padding: 10px; font-family: sans-serif;">
   <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
-  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/season_2025.html">2025 Season</a>
+  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
 </div>
 """
 
@@ -486,7 +486,7 @@ fig.write_html(REPORT_FILE, include_plotlyjs='cdn', full_html=True)
 nav_bar_html = """
 <div style="background-color: #333; overflow: hidden; padding: 10px; font-family: sans-serif; margin-bottom: 20px;">
   <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
-  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/season_2025.html">2025 Season</a>
+  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
 </div>
 """
 
