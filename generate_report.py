@@ -31,7 +31,7 @@ pd.set_option('display.max_colwidth', None)
 from sleeper.api import league, player
 
 # League ID
-#league_id = "1257253128554688512"  # 2025 season league ID
+#league_id = "1257253128554688512" #=== 2025 season league ID ===
 league_id = "1389362279690010624"
 my_league = league.get_league(league_id=league_id)
 
@@ -353,20 +353,20 @@ category_map = {
     "Underperformer": "Underperformer"
 }
 
-df_table = df_awards_wide_ext.reset_index()
-df_table.rename(columns={'Category': 'Weekly Award'})  
-df_table.columns = ['Weekly Award'] + [f"Week {col}" for col in df_table.columns if col not in ['index', 'Category']]
-df_table['Weekly Award'] = df_table['Weekly Award'].map(category_map)
-table_values = [df_table[col].astype(str).tolist() for col in df_table.columns]
+# Transpose the table so Weeks are rows instead of columns
+df_table_transposed = df_awards_wide_ext.T.reset_index()
+df_table_transposed.columns = ['Week'] + list(df_awards_wide_ext.index.map(category_map))
+
+# Format the Week column to look nicer (e.g., "Week 1" instead of just "1")
+df_table_transposed['Week'] = 'Week ' + df_table_transposed['Week'].astype(str)
+
+table_values = [df_table_transposed[col].astype(str).tolist() for col in df_table_transposed.columns]
 
 fig = make_subplots(
-    rows=3, cols=2,
-    specs=[[{"type": "xy"}, {"type": "xy"}],
-           [{"type": "xy"}, {"type": "xy"}],
-           [{"type": "table", "colspan": 2}, None]],
-    subplot_titles=("Weekly Scores", "Cumulative Avg Points", 
-                    "Weekly Luck %", "Cumulative Wins", "Weekly Awards"),
-    vertical_spacing=0.07
+    rows=2, cols=2,
+    subplot_titles=("Weekly Scores", "Cumulative Avg Points",
+                    "Weekly Luck %", "Cumulative Wins"),
+    vertical_spacing=0.1
 )
 
 managers = df_weekly['display_name'].unique()
@@ -437,22 +437,11 @@ for manager in managers:
         row=2, col=1
     )
 
-fig.add_trace(
-    go.Table(
-        header=dict(values=list(df_table.columns),
-                    fill_color='lightgrey',
-                    align='left'),
-        cells=dict(values=table_values,
-                   fill_color='white',
-                   align='left')
-    ),
-    row=3, col=1
-)
-
 fig.update_layout(
     autosize=True,
     showlegend=True,
-    title_text="Bethesda Pool Weekly Stats Dashboard"
+    title_text="Bethesda Pool Weekly Stats Dashboard",
+    height=800
 )
 
 fig.update_yaxes(dtick=1, row=2, col=2)
@@ -467,8 +456,8 @@ max_week = df_weekly['Week'].max()
 
 fig.update_xaxes(
     tickvals=list(range(max_week + 1)),  # only show ticks 1, 2, 3, ...
-    ticktext=['Week 1'] + [str(i+1) for i in range(1, max_week + 1)], # labels for each tick
-    range=[0, max_week]  # optional: limits axis to your data
+    ticktext=['Week 1'] + [str(i+1) for i in range(1, max_week)] + [''], # labels for each tick
+    range=[-0.05 * max_week, max_week]  # optional: limits axis to your data
 )
 
 # Define your navigation bar HTML
@@ -479,31 +468,37 @@ nav_bar_html = """
 </div>
 """
 
-# 1. Write the HTML file normally
-fig.write_html(REPORT_FILE, include_plotlyjs='cdn', full_html=True)
+# 1. Write the charts to the file
+fig.write_html(
+    REPORT_FILE,
+    include_plotlyjs='cdn',
+    full_html=True,
+    config={'responsive': True}
+)
 
-# 2. Define your navigation bar
-nav_bar_html = """
-<div style="background-color: #333; overflow: hidden; padding: 10px; font-family: sans-serif; margin-bottom: 20px;">
-  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
-  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
-</div>
+# 2. Convert your DataFrame to a clean HTML Table
+table_html = df_table_transposed.to_html(index=False, classes='awards-table', border=0)
+
+# 3. Define your custom CSS and Nav Bar
+custom_html = f"""
+{nav_bar_html}
+<style>
+  .awards-table {{ width: 95%; border-collapse: collapse; margin: 30px auto 50px auto; font-family: sans-serif; }}
+  .awards-table th {{ background-color: lightgrey; padding: 10px; text-align: left; }}
+  .awards-table td {{ padding: 10px; border-bottom: 1px solid #ddd; }}
+</style>
 """
 
-# 3. Read the file, inject the nav bar, and save it back
+# 4. Inject everything into the final file
 with open(REPORT_FILE, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-# Insert the nav bar right after the opening <body> tag
 if '<body>' in html_content:
-    html_content = html_content.replace('<body>', f'<body>\n{nav_bar_html}')
-else:
-    # Fallback if <body> isn't found exactly
-    html_content = nav_bar_html + html_content
+    html_content = html_content.replace('<body>', f'<body>\n{custom_html}')
+    html_content = html_content.replace('</body>', f'{table_html}\n</body>')
 
 with open(REPORT_FILE, 'w', encoding='utf-8') as f:
     f.write(html_content)
-
 
 # In[16]:
 
