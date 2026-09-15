@@ -12,11 +12,12 @@ import matplotlib.pyplot as plt
 from sleeper.api import league, player
 
 # Assign constants and variables
-REPORT_FILE = "league_dashboard.html"
+#REPORT_FILE = "league_dashboard.html"
+REPORT_FILE = "2025_season.html"
 DEPLOY_DIR = "deploy"
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
-#league_id = "1257253128554688512"  ## 2025 SEASON ##
-league_id = "1389362279690010624"
+league_id = "1257253128554688512"  ## 2025 SEASON ##
+#league_id = "1389362279690010624"
 
 pd.set_option('display.max_colwidth', None)
 
@@ -98,11 +99,9 @@ df_roster_long = df_roster_long.drop(columns='PositionOrder')
 weekly_data = []
 week = 1
 
-while True:
+while week < 18:
     # Get the team-centric matchup data for the week
     matchup_entries = league.get_matchups_for_week(league_id=league_id, week=week)
-    if not matchup_entries:
-        break  # no more weeks
 
     df_week = pd.DataFrame(matchup_entries)
     df_week['Points'] = [entry['points'] for entry in matchup_entries]
@@ -121,6 +120,7 @@ while True:
 
     # Determine weekly winners by comparing points within each matchup_id
     df_week['Win'] = False  # initialize
+    df_week = df_week.dropna(subset=['matchup_id'])
     for mid, group in df_week.groupby('matchup_id'):
         if len(group) == 2:
             if group.iloc[0]['points'] > group.iloc[1]['points']:
@@ -147,11 +147,18 @@ df_weekly['TeamWinPct'] = df_weekly['Win'].apply(lambda x: 100 if x else 0)
 # Total Win % (percent of other teams beaten that week)
 def total_win_pct(row, df):
     week_data = df[df['Week'] == row['Week']]
-    total_opponents = len(week_data) - 1
-    if total_opponents == 0:
+    total_teams = len(week_data)
+    if total_teams <= 2:
         return np.nan
     wins_if_played_all = sum(row['points'] > week_data['points'])
-    return (wins_if_played_all / total_opponents) * 100
+    max_wins_losses = total_teams - 1
+    if wins_if_played_all <= 1:
+        raw_pct = 0.0
+    elif wins_if_played_all == max_wins_losses - 1:
+        raw_pct = 100.0
+    else:
+        raw_pct = (wins_if_played_all / max_wins_losses) * 100
+    return raw_pct
 
 df_weekly['TotalWinPct'] = df_weekly.apply(lambda row: total_win_pct(row, df_weekly), axis=1)
 
@@ -437,6 +444,7 @@ nav_bar_html = """
   <img src="assets/league_logo.jpeg" alt="League Logo" style="height: 50px; margin-right: 15px; margin-left: 10px;">
   <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
   <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
+  <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="definitions.html">Definitions</a>
 </div>
 """
 
@@ -497,13 +505,16 @@ if os.path.exists("assets"):
 # Copy the new dashboard
 shutil.copyfile(REPORT_FILE, os.path.join(DEPLOY_DIR, "index.html"))
 
-# Copy the archive folder (if it exists)
+# Copy the archive folder
 if os.path.exists("archive"):
     shutil.copytree("archive", os.path.join(DEPLOY_DIR, "archive"))
 
+# Copy the definitions page
+if os.path.exists("definitions.html"):
+    shutil.copyfile("definitions.html", os.path.join(DEPLOY_DIR, "definitions.html"))
+
 # Wait for page to load to host
-print("Waiting for GitHub Pages to deploy.")
-time.sleep(120)
+print("Ready to deploy with GitHub Pages.")
 
 # ====== SEND LINK TO DISCORD ======
 GITHUB_PAGES_URL = "https://willmcwain.github.io/bethesda_pool_ff/"

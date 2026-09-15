@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metric Definitions</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #2D3139; }
+        p { line-height: 1.6; color: #333; }
+    </style>
+</head>
+<body>
+
+    <div style="background-color: #2D3139; overflow: hidden; padding: 10px; font-family: sans-serif; display: flex; align-items: center; flex-shrink: 0;">
+        <img src="../assets/league_logo.jpeg" alt="League Logo" style="height: 50px; margin-right: 15px; margin-left: 10px;">
+        <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="../index.html">Current Season</a>
+        <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
+        <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="../definitions.html">Definitions</a>
+    </div>
+
+    <div class="container">
+        <h2>Metric Definitions</h2>
+
+        <h3>Weekly Score</h3>
+        <p>The total points scored by a manager's starting lineup in their head-to-head matchup for a given week.</p>
+
+        <h3>Cumulative Average Score</h3>
+        <p>A running average of a manager's weekly scores across all completed matchups. This shows how scoring output trends over the course of a season.</p>
+
+        <h3>Luck %</h3>
+        <p>A measure of how a manager's weekly matchup result (win/loss) would change if they had competed against the rest of the league.
+            It calculates how many other teams a manager would have beaten in a given week and assigns a percentage for how (un)lucky that manager's matchup was.</p>
+        <p>Example: If a manager had the 2nd highest weekly score but played against the highest, their luck % for that week would be -100%;
+            and conversely, a manager with the 2nd lowest weekly score who played against the lowest would have a luck % of 100%.</p>
+
+        <h3>Cumulative Wins</h3>
+        <p>Your total number of head-to-head victories as the season progresses.</p>
+
+
+        <h3>Luckiest Manager</h3>
+        <p>The manager with the highest positive difference between their actual head-to-head result and their expected wins against the rest of the league. This often highlights a manager who won their matchup despite a low weekly score.</p>
+
+        <h3>Unluckiest Manager</h3>
+        <p>The manager with the lowest negative difference between their actual result and their league-wide performance. This typically highlights a manager who scored very well but still lost because they played the highest-scoring team of the week.</p>
+
+        <h3>Overperformer</h3>
+        <p>The manager who exceeded their own cumulative season average by the largest margin in a given week. This highlights the biggest individual boom week relative to a manager's established baseline.</p>
+
+        <h3>Underperformer</h3>
+        <p>The manager who fell short of their own cumulative season average by the largest margin. This highlights the biggest individual bust week relative to a manager's established baseline.</p>
+    </div>
+
+</body>
+</html>
