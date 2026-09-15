@@ -1,42 +1,29 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[9]:
-
-
+import time
 import requests
 import os
-import re
 import shutil
-import subprocess
 import pandas as pd
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.io as pio
 import numpy as np
 import matplotlib.pyplot as plt
+from sleeper.api import league, player
 
+# Assign constants and variables
 REPORT_FILE = "league_dashboard.html"
 DEPLOY_DIR = "deploy"
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
+#league_id = "1257253128554688512"  ## 2025 SEASON ##
+league_id = "1389362279690010624"
 
 pd.set_option('display.max_colwidth', None)
 
-
-# In[10]:
-
-
-from sleeper.api import league, player
-
-# League ID
-#league_id = "1257253128554688512" #=== 2025 season league ID ===
-league_id = "1389362279690010624"
+# ====== GET SLEEPER LEAGUE DATA ======
 my_league = league.get_league(league_id=league_id)
 
 matchup_json = league.get_matchups_for_week(league_id=league_id, week=1)
-#display(JSON(matchup_json))
 
 # Get users and rosters
 users = league.get_users_in_league(league_id=league_id)
@@ -49,11 +36,9 @@ for user in users:
     team_name = user["metadata"]["team_name"]
     team_names[username] = team_name
 
-# Convert to DataFrames
 df_users = pd.DataFrame(users)   # columns: user_id, display_name
 df_rosters = pd.DataFrame(rosters)  # columns: roster_id, owner_id
 
-# Merge to map roster_id -> manager name
 df_rosters_users = df_rosters.merge(
     df_users,
     left_on='owner_id',
@@ -61,16 +46,13 @@ df_rosters_users = df_rosters.merge(
     how='left'
 )
 
-# Keep only the columns you need
 df_rosters_users = df_rosters_users[['roster_id', 'display_name']]
 df_rosters_users = df_rosters_users.rename(columns={'display_name':'Manager'})
 
+# ====== GET SLEEPER PLAYER DATA ======
+
 # Get player dictionary
 all_players = player.get_all_players(sport="nfl")
-
-
-# In[11]:
-
 
 # Define fantasy position order
 position_order = {'QB': 0, 'RB': 1, 'WR': 2, 'TE': 3, 'K': 4, 'DST': 5}
@@ -104,21 +86,14 @@ for roster in rosters:
             'PositionOrder': position_order.get(position, 99)   # Number for sorting
         })
 
-# Create DataFrame
 df_roster_long = pd.DataFrame(data_long)
 
 # Sort by Manager, PositionOrder, then Player
 df_roster_long.sort_values(by=['Manager', 'PositionOrder', 'Player'], inplace=True)
 
-# Drop helper column
 df_roster_long = df_roster_long.drop(columns='PositionOrder')
 
-# Display table
-#display(HTML(df_roster_long.to_html(index=False)))
-
-
-# In[13]:
-
+# ====== GET SLEEPER MATCHUP DATA ======
 
 weekly_data = []
 week = 1
@@ -164,7 +139,7 @@ while True:
 # Concatenate all weeks into one DataFrame
 df_weekly = pd.concat(weekly_data, ignore_index=True)
 
-# --- Compute Metrics ---
+# ====== COMPUTE METRICS ======
 
 # Team Win %
 df_weekly['TeamWinPct'] = df_weekly['Win'].apply(lambda x: 100 if x else 0)
@@ -188,7 +163,6 @@ df_weekly['CumulativeWins'] = df_weekly.groupby('Manager')['Win'].cumsum()
 
 # Cumulative average points
 df_weekly['CumulativeAvgPoints'] = df_weekly.groupby('Manager')['points'].cumsum() / df_weekly.groupby('Manager').cumcount().add(1)
-
 
 # Weekly award calculations
 weekly_awards_extended = []
@@ -259,11 +233,7 @@ df_awards_wide_ext = df_awards_wide_ext.pivot(
     values='Value'
 )
 
-#display(df_awards_wide_ext)
-
-
-# In[14]:
-
+# ====== CREATE GRAPHS ======
 
 # Set general style
 sns.set(style="whitegrid")
@@ -331,7 +301,7 @@ fig4 = px.line(
     markers=True,
     hover_data={'LuckPct': ':.1f'}
 )
-fig4.add_hline(y=0, line_dash="dash", line_color="gray")  # reference line
+fig4.add_hline(y=0, line_dash="dash", line_color="gray")
 fig4.update_layout(
     title="Weekly Luck % per Manager",
     xaxis_title="Week",
@@ -340,9 +310,7 @@ fig4.update_layout(
 )
 fig4.show()
 
-
-# In[15]:
-
+# ====== BUILD AWARD TABLE ======
 
 category_map = {
     "HighestScore": "Highest Score",
@@ -361,6 +329,8 @@ df_table_transposed.columns = ['Week'] + list(df_awards_wide_ext.index.map(categ
 df_table_transposed['Week'] = 'Week ' + df_table_transposed['Week'].astype(str)
 
 table_values = [df_table_transposed[col].astype(str).tolist() for col in df_table_transposed.columns]
+
+# ====== PLACE POINTS ON GRAPHS ======
 
 fig = make_subplots(
     rows=2, cols=2,
@@ -455,12 +425,13 @@ fig.update_yaxes(
 max_week = df_weekly['Week'].max()
 
 fig.update_xaxes(
-    tickvals=list(range(max_week + 1)),  # only show ticks 1, 2, 3, ...
-    ticktext=['Week 1'] + [str(i+1) for i in range(1, max_week)] + [''], # labels for each tick
-    range=[-0.05 * max_week, max_week]  # optional: limits axis to your data
+    tickvals=list(range(max_week + 1)),
+    ticktext=['Week 1'] + [str(i+1) for i in range(1, max_week)] + [''],
+    range=[-0.05 * max_week, max_week]
 )
 
-# Define your navigation bar HTML
+# ====== BUILD HTML FILE ======
+
 nav_bar_html = """
 <div style="background-color: #2D3139; overflow: hidden; padding: 10px; font-family: sans-serif; display: flex; align-items: center; flex-shrink: 0;">
   <img src="assets/league_logo.jpeg" alt="League Logo" style="height: 50px; margin-right: 15px; margin-left: 10px;">
@@ -469,7 +440,7 @@ nav_bar_html = """
 </div>
 """
 
-# 1. Write the charts to the file
+# Write graphs to HTML
 fig.write_html(
     REPORT_FILE,
     include_plotlyjs='cdn',
@@ -477,10 +448,10 @@ fig.write_html(
     config={'responsive': True}
 )
 
-# 2. Convert your DataFrame to a clean HTML Table
+# Write award table to HTML
 table_html = df_table_transposed.to_html(index=False, classes='awards-table', border=0)
 
-# 3. Define your custom CSS and Nav Bar
+# Define custom styling
 custom_html = f"""
 {nav_bar_html}
 <style>
@@ -496,7 +467,7 @@ custom_html = f"""
 </style>
 """
 
-# 4. Inject everything into the final file
+# Open and write to existing file
 with open(REPORT_FILE, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
@@ -513,13 +484,13 @@ if '<body>' in html_content:
 with open(REPORT_FILE, 'w', encoding='utf-8') as f:
     f.write(html_content)
 
-# In[16]:
+# ====== DEPLOY HTML FILE ======
 
-# === Prep deploy folder ===
 if os.path.exists(DEPLOY_DIR):
     shutil.rmtree(DEPLOY_DIR)
 os.makedirs(DEPLOY_DIR, exist_ok=True)
 
+# Copy logo for nav bar
 if os.path.exists("assets"):
     shutil.copytree("assets", os.path.join(DEPLOY_DIR, "assets"))
 
@@ -530,10 +501,11 @@ shutil.copyfile(REPORT_FILE, os.path.join(DEPLOY_DIR, "index.html"))
 if os.path.exists("archive"):
     shutil.copytree("archive", os.path.join(DEPLOY_DIR, "archive"))
 
-print("Local build complete. Ready for GitHub Pages deployment.")
+# Wait for page to load to host
+print("Waiting for GitHub Pages to deploy.")
+time.sleep(120)
 
-# === Send link to Discord ===
-# Define your permanent GitHub Pages URL here
+# ====== SEND LINK TO DISCORD ======
 GITHUB_PAGES_URL = "https://willmcwain.github.io/bethesda_pool_ff/"
 
 data = {"content": f"Here’s this week’s report: {GITHUB_PAGES_URL}"}
