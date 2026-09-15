@@ -2,7 +2,7 @@ name: Generate and Deploy Fantasy Report
 
 on:
   schedule:
-    - cron: '27 12 * * 2'
+    - cron: '35 12 * * 2'
   workflow_dispatch:
 
 permissions:
