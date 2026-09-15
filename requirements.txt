@@ -1,0 +1,7 @@
+requests
+pandas
+seaborn
+plotly
+numpy
+matplotlib
+sleeper
