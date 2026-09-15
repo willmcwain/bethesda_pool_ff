@@ -462,9 +462,10 @@ fig.update_xaxes(
 
 # Define your navigation bar HTML
 nav_bar_html = """
-<div style="background-color: #333; overflow: hidden; padding: 10px; font-family: sans-serif;">
-  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
-  <a style="float: left; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
+<div style="background-color: #2D3139; overflow: hidden; padding: 10px; font-family: sans-serif; display: flex; align-items: center;">
+  <img src="assets/league_logo.jpeg" alt="League Logo" style="height: 50px; margin-right: 15px; margin-left: 10px;">
+  <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
+  <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
 </div>
 """
 
@@ -483,6 +484,12 @@ table_html = df_table_transposed.to_html(index=False, classes='awards-table', bo
 custom_html = f"""
 {nav_bar_html}
 <style>
+  body {{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }}
+  
   .awards-table {{ width: 95%; border-collapse: collapse; margin: 30px auto 50px auto; font-family: sans-serif; }}
   .awards-table th {{ background-color: lightgrey; padding: 10px; text-align: left; }}
   .awards-table td {{ padding: 10px; border-bottom: 1px solid #ddd; }}
@@ -493,9 +500,15 @@ custom_html = f"""
 with open(REPORT_FILE, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
+footer_html = """
+<div style="text-align: center; padding: 20px; color: #666; font-family: sans-serif; font-size: 12px; margin-top: auto; border-top: 1px solid #ddd;">
+  &copy; 2026 Will McWain. Made for Bethesda Pool Fantasy Football League. All rights reserved.
+</div>
+"""
+
 if '<body>' in html_content:
     html_content = html_content.replace('<body>', f'<body>\n{custom_html}')
-    html_content = html_content.replace('</body>', f'{table_html}\n</body>')
+    html_content = html_content.replace('</body>', f'{table_html}\n{footer_html}\n</body>')
 
 with open(REPORT_FILE, 'w', encoding='utf-8') as f:
     f.write(html_content)
@@ -506,6 +519,9 @@ with open(REPORT_FILE, 'w', encoding='utf-8') as f:
 if os.path.exists(DEPLOY_DIR):
     shutil.rmtree(DEPLOY_DIR)
 os.makedirs(DEPLOY_DIR, exist_ok=True)
+
+if os.path.exists("assets"):
+    shutil.copytree("assets", os.path.join(DEPLOY_DIR, "assets"))
 
 # Copy the new dashboard
 shutil.copyfile(REPORT_FILE, os.path.join(DEPLOY_DIR, "index.html"))
