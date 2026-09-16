@@ -440,7 +440,7 @@ fig.update_xaxes(
 nav_bar_html = """
 <div style="background-color: #2D3139; overflow: hidden; padding: 10px; font-family: sans-serif; display: flex; align-items: center; flex-shrink: 0;">
   <img src="assets/league_logo.jpeg" alt="League Logo" style="height: 50px; margin-right: 15px; margin-left: 10px;">
-  <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
+  <a style="color: #2DC5CA; font-weight: bold; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="index.html">Current Season</a>
   <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="archive/2025_season.html">2025 Season</a>
   <a style="color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 17px;" href="definitions.html">Definitions</a>
 </div>
