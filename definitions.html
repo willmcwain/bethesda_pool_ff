@@ -29,26 +29,35 @@
         <p>A running average of a manager's weekly scores across all completed matchups. This shows how scoring output trends over the course of a season.</p>
 
         <h3>Luck %</h3>
-        <p>A measure of how a manager's weekly matchup result (win/loss) would change if they had competed against the rest of the league.
-            It calculates how many other teams a manager would have beaten in a given week and assigns a percentage for how (un)lucky that manager's matchup was.</p>
-        <p>Example: If a manager had the 2nd highest weekly score but played against the highest, their luck % for that week would be -100%;
-            and conversely, a manager with the 2nd lowest weekly score who played against the lowest would have a luck % of 100%.</p>
+        <p>A measure of how a manager's actual matchup result compares to their expected results against the rest of the league.
+            It is calculated by taking the actual win % (100% for a win and 0% for a loss) and subtracting the win/loss percentage against other teams.</p>
+        <ul>
+            <li><b>Example 1:</b> If a manager had the 2nd highest weekly score but played against the highest, their luck % for that week would be -100%;
+                and conversely, a manager with the 2nd lowest weekly score who played against the lowest would have a luck % of 100%.</li>
+            <li><b>Example 2:</b> The managers with the highest and lowest scores each week have 0% luck, as their actual results did not rely on their matchups.</li>
+            <li><b>Example 3:</b> A manager who scored higher than 5 others but lost their matchup would have -55.56% luck, as they would have received a win against 5 out of 9 teams.</li>
+        </ul>
 
         <h3>Cumulative Wins</h3>
         <p>Your total number of head-to-head victories as the season progresses.</p>
 
-
         <h3>Luckiest Manager</h3>
-        <p>The manager with the highest positive difference between their actual head-to-head result and their expected wins against the rest of the league. This often highlights a manager who won their matchup despite a low weekly score.</p>
+        <p>The manager with the highest luck % in a given week, which highlights a manager who won their matchup despite a comparatively low score.</p>
 
         <h3>Unluckiest Manager</h3>
-        <p>The manager with the lowest negative difference between their actual result and their league-wide performance. This typically highlights a manager who scored very well but still lost because they played the highest-scoring team of the week.</p>
+        <p>The manager with the lowest luck % in a given week, which highlights a manager who lost their matchup despite a comparatively high score.</p>
 
         <h3>Overperformer</h3>
-        <p>The manager who exceeded their own cumulative season average by the largest margin in a given week. This highlights the biggest individual boom week relative to a manager's established baseline.</p>
+        <p>The manager who exceeded their own cumulative average score by the largest margin in a given week, which highlights the biggest individual boom week relative to a manager's established baseline.</p>
+        <ul>
+            <li><b>Note:</b> This award goes to the highest scoring manager in week 1, as all cumulative average scores are 0.</li>
+        </ul>
 
         <h3>Underperformer</h3>
-        <p>The manager who fell short of their own cumulative season average by the largest margin. This highlights the biggest individual bust week relative to a manager's established baseline.</p>
+        <p>The manager who fell short of their own cumulative average score by the largest margin in a given week, which highlights the biggest individual bust week relative to a manager's established baseline.</p>
+        <ul>
+            <li><b>Note:</b> This award goes to the lowest scoring manager in week 1, as all cumulative average scores are 0.</li>
+        </ul>
     </div>
 
 </body>
