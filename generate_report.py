@@ -1,4 +1,3 @@
-import time
 import requests
 import os
 import shutil
@@ -12,12 +11,11 @@ import matplotlib.pyplot as plt
 from sleeper.api import league, player
 
 # Assign constants and variables
-#REPORT_FILE = "league_dashboard.html"
-REPORT_FILE = "2025_season.html"
+REPORT_FILE = "league_dashboard.html"
 DEPLOY_DIR = "deploy"
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
-league_id = "1257253128554688512"  ## 2025 SEASON ##
-#league_id = "1389362279690010624"
+#league_id = "1257253128554688512"  ## 2025 SEASON ##
+league_id = "1389362279690010624"
 
 pd.set_option('display.max_colwidth', None)
 
