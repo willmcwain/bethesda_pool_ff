@@ -2,7 +2,7 @@ name: Generate and Deploy Fantasy Report
 
 on:
   schedule:
-    - cron: '50 8 * * 2'
+    - cron: '32 5 * * 2'
       timezone: "America/New_York"
   workflow_dispatch:
 
